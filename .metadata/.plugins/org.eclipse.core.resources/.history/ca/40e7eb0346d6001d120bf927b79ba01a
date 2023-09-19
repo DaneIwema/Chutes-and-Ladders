@@ -1,0 +1,29 @@
+package ilstu.edu;
+
+public class Card {
+	
+	private int cardNum;
+	private String suit;
+	
+	public Card (int cardNum, String suit) {
+		this.cardNum = cardNum;
+		this.suit = suit;
+	}
+	
+	public int getCardNum() {
+		return cardNum;
+	}
+	
+	public String getSuit() {
+		return suit;
+	}
+	
+	public String toString() {
+		StringBuilder card = new StringBuilder();
+		card.append(cardNum);
+		card.append(" of ");
+		card.append(suit);
+		card.append("'s");
+		return card.toString();
+	}
+}

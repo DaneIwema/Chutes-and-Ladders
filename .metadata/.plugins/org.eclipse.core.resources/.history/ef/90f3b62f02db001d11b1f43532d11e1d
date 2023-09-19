@@ -1,0 +1,96 @@
+package ilstu.edu;
+
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Stack;
+import java.security.SecureRandom;
+import java.util.Scanner;
+
+public class Game {
+	
+	private LinkedList<Integer> cards;
+	private Stack<Integer> faceDownCards;
+	private Stack<Integer> faceUpCards;
+	private Queue<Player> players;
+	
+	public Game(String [] players) {
+		this.cards = new LinkedList<Integer>();
+		this.faceDownCards = new Stack<Integer>();
+		this.faceUpCards = new Stack<Integer>();
+		this.players = new LinkedList<Player>();
+		populateCards();
+		shuffle();
+		for (int i = 0; i < players.length; i++) {
+			if (players[i] == null)
+				break;
+			this.players.add(new Player(players[i], this.faceDownCards.pop(), this.faceDownCards.pop(),this.faceDownCards.pop(),this.faceDownCards.pop()));
+		}
+	}
+	
+	private void populateCards() {
+		if (cards.isEmpty() && faceUpCards.isEmpty()) {
+			for (int i = 1; i <= 10; i++)
+				cards.add(i);
+			for (int i = 11; i <= 20; i++)
+				cards.add(i);
+			for (int i = 21; i <= 30; i++)
+				cards.add(i);
+			for (int i = 31; i <= 40; i++)
+				cards.add(i);
+		}
+		else {
+			int temp = faceUpCards.pop();
+			while (!faceUpCards.isEmpty())
+				cards.add(faceUpCards.pop());
+			faceUpCards.push(temp);
+		}
+	}
+	
+	private void shuffle() {
+		if (cards.isEmpty())
+			return;
+		SecureRandom rand = new SecureRandom();
+		int temp = rand.nextInt(cards.size());
+		faceDownCards.push(cards.get(temp));
+		cards.remove(temp);
+		shuffle();
+	}
+	
+	public void simulateGame() {
+		while (!players.peek().drawCard(faceDownCards.pop())){
+			faceUpCards.add(players.peek().throwCard());
+			for (int i = 0; i < players.size(); i++) {
+				System.out.println(players.peek());
+				players.add(players.poll());
+			}
+			players.add(players.poll());
+			if (faceDownCards.peek() == null) {
+				populateCards();
+				shuffle();
+			}
+			
+			System.out.println("The card facing up is " + getCardString(faceUpCards.peek()) + "\n");
+			if (players.peek().decideCard(faceUpCards.peek()))
+				break;
+		}
+	}
+	
+	public String getCardString(int card) {
+		StringBuilder cardString = new StringBuilder();
+		if (card % 10 == 1)
+			cardString.append("Ace");
+		else if (card % 10 == 0)
+			cardString.append(10);
+		else
+			cardString.append(card % 10);
+		if (card / 10 == 0 || card == 10)
+			cardString.append(" of Clubs");
+		else if (card / 10 == 1 || card == 20)
+			cardString.append(" of Hearts");
+		else if (card / 10 == 2 || card == 30)
+			cardString.append(" of Spades");
+		else if (card / 10 == 3 || card == 40)
+			cardString.append(" of Diamonds");
+		return cardString.toString();
+	}
+}

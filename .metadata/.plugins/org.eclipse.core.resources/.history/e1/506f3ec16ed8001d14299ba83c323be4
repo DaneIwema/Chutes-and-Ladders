@@ -1,0 +1,50 @@
+package ilstu.edu;
+
+public class Card {
+	
+	private int cardNum;
+	private int suit;
+	
+	/**
+	 * This Constructor takes a card number  as an integer and a card suit as a integer. 
+	 * The card suit integer is represented as 1 is Clubs, 2 is Hearts, 3 is Spades, and 4 is Diamonds.
+	 * I chose this method as i can use comparison opperators to sort the players hand
+	 * @param cardNum
+	 * @param suit
+	 */
+	public Card (int cardNum, int suit) {
+		this.cardNum = cardNum;
+		this.suit = suit;
+	}
+	
+	public int getCardNum() {
+		return cardNum;
+	}
+	
+	public int getSuit() {
+		return suit;
+	}
+	
+	public void setCardNum(int newNum) {
+		this.cardNum = newNum;
+	}
+	
+	public void setSuit(int newSuit) {
+		this.suit = newSuit;
+	}
+	
+	public String toString() {
+		StringBuilder card = new StringBuilder();
+		card.append(cardNum);
+		card.append(" of ");
+		if (suit == 1)
+			card.append("Club's");
+		if (suit == 2)
+			card.append("Club's");
+		if (suit == 3)
+			card.append("Club's");
+		if (suit == 4)
+			card.append("Club's");
+		return card.toString();
+	}
+}

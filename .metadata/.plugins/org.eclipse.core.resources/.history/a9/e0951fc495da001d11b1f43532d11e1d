@@ -1,0 +1,209 @@
+package ilstu.edu;
+
+import java.util.LinkedList;
+
+public class Player {
+
+	private String name;
+	private LinkedList<Integer> hand;
+	
+	/**
+	 * Player constructor, takes a name and the four cards they are dealt and creates the players Hand with this. 
+	 * @param name - player's name
+	 * @param card1 - first card
+	 * @param card2 - second card
+	 * @param card3 - third card
+	 * @param card4 - fourth card
+	 */
+	public Player(String name, int card1, int card2, int card3, int card4) {
+		this.name = name;
+		this.hand = new LinkedList<Integer>();
+		addCardInOrder(card1);
+		addCardInOrder(card2);
+		addCardInOrder(card3);
+		addCardInOrder(card4);
+	}
+	
+	/**
+	 * This method will take a card and add it to the players hand in the order of
+	 * clubs, hearts, spades, and diamonds. If the card suits are the same then it
+	 * will be added in order of least to greatest from the card's number.
+	 * @param card - the card being added to the player's hand. 
+	 */
+	public void addCardInOrder(int card) {
+		for (int i = 0; i < hand.size(); i++) {
+	        if (card < hand.get(i)) {
+	            hand.add(i, card);
+	            return;
+	        }
+	    }
+	    hand.add(card);
+	}
+
+	
+	/**
+	 * Used to make the player's decision whether they should pull from the floor or from the face down deck. 
+	 * @param floor - the face up card from the floor
+	 * @return decision - boolean, true if they should pull from the floor for a win, or false if they should pull a new card.
+	 */
+	public boolean decideCard(int floor) {
+		if (checkWin(floor) != 0) {
+			drawCard(floor);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param drawFrom - boolean used to represent whether or not to 
+	 * @param floor - the face up card from the floor
+	 * @return
+	 */
+	public boolean drawCard(int floor) {
+		if (checkWin(floor) != 0) {
+			System.out.println(name + " has drawn from the floor.\n");
+			if (checkWin(floor) == 4)
+				System.out.println(name + " has won with a 4 of a kind!");
+			else if (checkWin(floor) == 20)
+				System.out.println(name + " has won by their cards adding to 20!");
+			addCardInOrder(floor);
+			System.out.println(this);
+				return true;
+		}
+		else {
+			System.out.println(name + " drew a new card.");
+			addCardInOrder(floor);
+			return false;
+		}
+	}
+	
+	/**
+	 * This method is used to determine the most useless card to throw, removes it from the hand, and returns that card.
+	 * @return card - this will return a card that is removed from the players hand for the face up stack.
+	 */
+	public int throwCard() {
+		int thrownCard = -1;
+	    int[] suitTotal = new int[4];
+	    
+	    // Count the number of cards in each suit
+	    int suit = 0;
+	    for (int i = 0; i < hand.size(); i++) {
+	    	if (hand.get(i) == 10 || hand.get(i) == 20 || hand.get(i) == 30 || hand.get(i) == 40)
+	    		suit = (hand.get(i) / 10) - 1;
+	    	else
+	    		suit = hand.get(i) / 10;
+	        suitTotal[suit]++;
+	    }
+	    
+	    // Find the suit(s) with the lowest count
+	    int minSuitCount = 5;
+	    for (int count : suitTotal) {
+	        if (count > 0 && count < minSuitCount) {
+	            minSuitCount = count;
+	        }
+	    }
+	    
+	    // Find the highest card that is part of the suit(s) with the lowest count
+	    for (int i = 0; i < hand.size(); i++) {
+	        int card = hand.get(i);
+	        suit = card / 10;
+	        int value = card % 10;
+	        
+	        if (suitTotal[suit] == minSuitCount && value > thrownCard % 10) {
+	            thrownCard = card;
+	        }
+	    }
+	    
+	    // Remove the thrown card from the hand and return it
+	    if (thrownCard != -1) {
+	        hand.remove(hand.indexOf(thrownCard));
+	    }
+	    
+	    System.out.println(name + " threw to the floor!\n");
+	    return thrownCard;
+//		int thrownCard = hand.get(0);
+//		int  [] suitTotal = new int [4];
+//		for (int i = 0; i < hand.size() - 1; i++) {
+//			int suit =  hand.get(i) / 10;
+//			suitTotal[suit]++;
+//		}
+//		int highestCount = 0;
+//		int secondHighestCount = -1;
+//		for (int i = 0; i < suitTotal.length; i++) {
+//			if (suitTotal[i] >= suitTotal[highestCount])
+//				highestCount = i;
+//		}
+//		for (int i = 0; i < suitTotal.length; i++) {
+//			if (i != highestCount && suitTotal[i] == suitTotal[highestCount])
+//				secondHighestCount = i;
+//		}
+//		for (int i = 0; i < hand.size(); i++) {
+//			if (secondHighestCount == -1) {
+//				if ((hand.get(i) / 10) != highestCount && (hand.get(i) % 10) > (thrownCard % 10))
+//					thrownCard = hand.get(i);
+//			}
+//			else if ((hand.get(i) / 10) != highestCount && (hand.get(i) / 10) != secondHighestCount && (hand.get(i) % 10) > (thrownCard % 10))
+//				thrownCard = hand.get(i);
+//		}
+//		System.out.println(name + " threw to the floor!\n");
+//		for (int i = 0; i < hand.size(); i++)
+//			if (thrownCard == hand.get(i)) {
+//				hand.remove(i);
+//				break;
+//			}
+//		return thrownCard;
+	}
+	
+	/**
+	 * This method is used to determine if there is a win condition and what that win condition is and returns the condition.
+	 * @param floor - this is the top of the face up stack.
+	 * @return an integer value of 0, 4, or 20. 0 if there is no win condition met,
+	 * 		4 if there is a 4 of a kind for the suit, and 20 if there is a set that adds to 20.
+	 */
+	public int checkWin(int floor) {
+		int  [] suitTotal = new int [5];
+		int total = floor / 10;
+		suitTotal[total]++;
+		total = floor % 10;
+		for (int i = 0; i < hand.size(); i++) {
+			int suit =  hand.get(i) / 10;
+			suitTotal[suit]++;
+			total += hand.get(i) % 10;
+			total++;
+		}
+		for (int card : suitTotal) {
+			if (card == 4)
+				return 4;
+		}
+		for (int i = 0; i < hand.size(); i++) {
+			if (total - (hand.get(i) % 10) == 20)
+				return 20;
+		}
+		return 0;
+	}
+	
+	public String toString() {
+		StringBuilder player = new StringBuilder();
+		player.append(name + "'s hand: ");
+		for (int i = 0; i < hand.size(); i++) {
+			if (hand.get(i) % 10 == 1)
+				player.append("Ace");
+			else if ((hand.get(i) % 10) == 0)
+				player.append(10);
+			else
+				player.append((hand.get(i) % 10));
+			if (hand.get(i) / 10 == 0 || hand.get(i) == 10)
+				player.append(" of Clubs");
+			else if (hand.get(i) / 10 == 1 || hand.get(i) == 20)
+				player.append(" of Hearts");
+			else if (hand.get(i) / 10 == 2 || hand.get(i) == 30)
+				player.append(" of Spades");
+			else if (hand.get(i) / 10 == 3 || hand.get(i) == 40)
+				player.append(" of Diamonds");
+			if (i < hand.size() - 1)
+				player.append(", ");
+		}
+		return player.toString();
+	}
+}

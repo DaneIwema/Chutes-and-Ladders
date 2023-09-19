@@ -1,0 +1,188 @@
+package ilstu.edu;
+
+import java.util.LinkedList;
+
+public class Player {
+
+	private String name;
+	private Node head;
+	
+	static class Node {
+		
+		private Node next;
+		private Node prev;
+		private Card card;
+
+		private Node(Card card, Node prev) {
+			this.card = card;
+			this.prev = prev;
+			this.next = null;
+		}
+	}
+	
+	public Player(String name, Card card1, Card card2, Card card3, Card card4) {
+		this.name = name;
+		addCardInOrder(card1);
+		addCardInOrder(card2);
+		addCardInOrder(card3);
+		addCardInOrder(card4);
+	}
+	
+	public void addCardInOrder(Card card) {
+	    if (head == null) {
+	        head = new Node(card, null);
+	        return;
+	    }
+	    Node current = head;
+	    while (current != null) {
+	    	if (card.getSuit() < current.card.getSuit()) {
+	    		if (card.getCardNum() < current.card.getCardNum()) {
+		        	if (current == head) {
+		        		head = new Node(card, null);
+		        		current.prev = head;
+		        		head.next = current;
+		        		return;
+		        	}
+		        	else {
+		        		Node temp = new Node(card, current.prev);
+		        		current.prev.next = temp;
+		        		current.prev = temp;
+		        		temp.next = current;
+		        		return;
+		        	}
+	    		}
+	    	}
+	    	else if (current.next == null){
+	    		current.next = new Node(card, current);
+	    		return;
+	    	}
+	    	
+	        current = current.next;
+	    }
+	}
+
+	
+	/**
+	 * Used to make the player's decision whether they should pull from the floor or from the face down deck. 
+	 * @param floor - the face up card from the floor
+	 * @return decision - boolean, true if they should pull from the floor for a win, or false if they should pull a new card.
+	 */
+	public boolean decideCard(Card floor) {
+		if (checkWin(floor) != 0) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param drawFrom - boolean used to represent whether or not to 
+	 * @param floor - the face up card from the floor
+	 * @return
+	 */
+	public boolean drawCard(Card floor) {
+		for (int i = 0; i <= 4; i++) {
+			if (hand[i] == null) {
+				hand[i] = floor;
+				break;
+			}
+		}
+		if (checkWin(floor) != 0) {
+			System.out.println(name + " has drawn from the floor.");
+			if (checkWin(floor) == 4)
+				System.out.println(name + " has won with a 4 of a kind of " + floor.getSuit() + "'s!");
+			else if (checkWin(floor) == 20)
+				System.out.println(name + " has won by their cards adding to 20!");
+			System.out.println(this);
+				return true;
+		}
+		else {
+			System.out.println(name + " drew a new card.");
+			return false;
+		}
+	}
+	
+	/**
+	 * This method is used to determine the most useless card to throw and returns that card.
+	 * @return card - this will return a card that is removed from the players hand for the face up stack.
+	 */
+	public Card throwCard() {
+		Card[] temp = {new Card(0, "Heart"), new Card(0, "Club"), new Card(0, "Spade"), new Card(0, "Diamond")};
+		for (int i = 0; i < hand.length; i++) {
+			if (hand[i].getSuit() == "Heart")
+				temp[0].setCardNum(temp[0].getCardNum() + 1);
+			if (hand[i].getSuit() == "Club")
+				temp[1].setCardNum(temp[1].getCardNum() + 1);
+			if (hand[i].getSuit() == "Spade")
+				temp[2].setCardNum(temp[2].getCardNum() + 1);
+			if (hand[i].getSuit() == "Diamond")
+				temp[3].setCardNum(temp[3].getCardNum() + 1);
+		}
+		Card thrownCard = hand[0];
+		for (int i = 1; i < hand.length; i++) {
+			for (int j = 0; j < temp.length; j++) {
+				if (hand[i].getSuit() == temp[j].getSuit() && temp[j].getCardNum() == 1 && thrownCard.getCardNum() < hand[i].getCardNum())
+					thrownCard = hand[i];
+			}
+		}
+		for (int i = 0; i <= 4; i++) {
+			if (thrownCard == hand[i])
+				hand[i] = null;
+		}
+		System.out.println(name + " threw their " + thrownCard + "\n");
+		return thrownCard;
+	}
+	
+	/**
+	 * This method is used to determine if there is a win condition and what that win condition is and returns the condition.
+	 * @param floor - this is the top of the face up stack.
+	 * @return an integer value of 0, 4, or 20. 0 if there is no win condition met,
+	 * 		4 if there is a 4 of a kind for the suit, and 20 if there is a set that adds to 20.
+	 */
+	public int checkWin(Card floor) {
+		boolean remove = false;
+		for (int i = 0; i <= 4; i++) {
+			if (hand[i] == null) {
+				hand[i] = floor;
+				remove = true;
+				break;
+			}
+		}
+		int winCondition = 1;
+		for (int i = 0; i < 5; i++) {
+			if (floor.getSuit() == hand[i].getSuit())
+				winCondition++;
+		}
+		if (winCondition != 4)
+			winCondition = 0;
+		if (hand[0].getCardNum() + hand[1].getCardNum() + hand[2].getCardNum() + hand[3].getCardNum() == 20)
+			winCondition = 20;
+		if (hand[0].getCardNum() + hand[1].getCardNum() + hand[2].getCardNum() + hand[4].getCardNum() == 20)
+			winCondition = 20;
+		if (hand[0].getCardNum() + hand[1].getCardNum() + hand[3].getCardNum() + hand[4].getCardNum() == 20)
+			winCondition = 20;
+		if (hand[1].getCardNum() + hand[2].getCardNum() + hand[3].getCardNum() + hand[4].getCardNum() == 20)
+			winCondition = 20;
+		if (remove) {
+			for (int i = 0; i <= 4; i++) {
+				if (hand[i] == floor) {
+					hand[i] = null;
+					break;
+				}
+			}
+		}
+		return winCondition;
+	}
+	
+	public String toString() {
+		StringBuilder player = new StringBuilder();
+		player.append(name + "'s hand: ");
+		Node temp = head;
+		while (temp!=null) {
+			player.append(temp.card.toString());
+			player.append(" ");
+			temp = temp.next;
+		}
+		return player.toString();
+	}
+}
